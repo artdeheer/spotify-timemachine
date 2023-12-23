@@ -1,0 +1,8 @@
+make tui/gui
+make all function smaller functions with designated tasks
+
+make one main python file that asks if you want to create a new validsongs list or use the current one
+make a textfile that shows the stats of all songs in the playlist, you could link to it in the playlist descriptiom
+finally ask the user for input to connect to spotify
+
+implement this in a website where you can request your data and stuff, you could make it available for 2 euro or something, dependent on the amount of data there is
