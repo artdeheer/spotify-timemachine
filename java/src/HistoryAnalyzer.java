@@ -22,76 +22,94 @@ import java.math.RoundingMode;
 public class HistoryAnalyzer {
 
     public static void main(String[] args) throws IOException {
+//        if (args.length < 1){
+//            System.out.println("Too few arguments, give the directory of ");
+//        }
         getAllValidSongs();
     }
 
     public static ArrayList<String> getAllValidSongs() throws IOException {
-        String dir = "../../streaming data/rawdata/";
-        List<String> filelist = listFiles(dir);
-        System.out.println(filelist);
-
-        JSONArray jsonArray = sortJSONFiles(filelist, dir);
-
-        double totalElements = totalElements(filelist, dir);
-        double validElements = jsonArray.length();
-        double difference = totalElements - validElements;
-
-        System.out.println("Total elements: " + totalElements(filelist, dir));
-        System.out.println("Valid elements: " + jsonArray.length());
-        System.out.println("Skipped elements: " + difference);
+        String directory = "../../streaming data/rawdata/";
+        List<String> filelist = listFiles(directory);
+        JSONArray jsonArray = sortJSONFiles(filelist, directory);
+        double validElements = printStats(filelist, directory, jsonArray);
 
         ArrayList<String> validSongs = new ArrayList<>();
         double elementcount = 0;
+
+        for (int i = 0; i < validElements; i++){
+            addToMap(i, validElements, jsonArray, validSongs);
+            elementcount++;
+            //percentage
+            printPercentage(elementcount, validElements);
+        }
+
+        printStringArray(validSongs);
+        writeArrayListToFile(new File("../../streaming data/valid songs/valid_songs.txt"), validSongs);
+        return validSongs;
+    }
+
+    public static void printPercentage(double elementcount, double validElements){
+        System.out.println(String.format("%.2f", elementcount / validElements * 100) + "%");
+    }
+
+    public static void printStringArray(ArrayList<String> stringArray){
+        System.out.println(stringArray);
+        System.out.println("Amount: " + stringArray.size());
+    }
+
+
+    public static double printStats(List<String> filelist, String directory, JSONArray jsonArray) throws IOException {
+        System.out.println(filelist);
+
+        double totalElements = totalElements(filelist, directory);
+        double validElements = jsonArray.length();
+        double difference = totalElements - validElements;
+
+        System.out.println("Total elements: " + totalElements(filelist, directory));
+        System.out.println("Valid elements: " + jsonArray.length());
+        System.out.println("Skipped elements: " + difference);
+
+        return validElements;
+    }
+
+    public static void addToMap(int outerCount, double validElements, JSONArray jsonArray, ArrayList<String> validSongs){
+        JSONObject subject = jsonArray.getJSONObject(outerCount);
+        int subSongcount = 0;
+        if (validSongs.contains(subject.getString("spotify_track_uri"))){
+            return;
+        }
 
         //percentage that a song should have been played within given timeframe, 1 = 100%
         BigDecimal treshold = new BigDecimal("0.03");
         int timeframe = 1; //months
         int min = 10; // minimum amount of streams a song has to have had within the period
 
-        for (int i = 0; i < validElements; i++){
-            JSONObject subject = jsonArray.getJSONObject(i);
-            int subSongcount = 0;
-            if (validSongs.contains(subject.getString("spotify_track_uri"))){
-                continue;
+        Instant subDate = Instant.parse(subject.getString("ts"));
+        Instant endDate = subDate.atZone(ZoneId.of("UTC")).plusMonths(timeframe).toInstant();
+
+        String trackID = subject.getString("spotify_track_uri");
+
+        //declaring needed variables for calculations
+        BigDecimal totalTimePlayed = new BigDecimal("0");
+        BigDecimal subTimePlayed = new BigDecimal("0");
+
+        for (int j = outerCount; j < validElements; j++){
+            JSONObject comparator = jsonArray.getJSONObject(j);
+            Instant compDate = Instant.parse(comparator.get("ts").toString());
+            if (compDate.isAfter(endDate)){
+                break;
             }
+            totalTimePlayed = totalTimePlayed.add(new BigDecimal((comparator.get("ms_played")).toString()));
 
-            Instant subDate = Instant.parse(subject.getString("ts"));
-            Instant endDate = subDate.atZone(ZoneId.of("UTC")).plusMonths(timeframe).toInstant();
-
-            String trackID = subject.getString("spotify_track_uri");
-
-            //declaring needed variables for calculations
-            BigDecimal totalTimePlayed = new BigDecimal("0");
-            BigDecimal subTimePlayed = new BigDecimal("0");
-
-            for (int j = i; j < validElements; j++){
-                JSONObject comparator = jsonArray.getJSONObject(j);
-                Instant compDate = Instant.parse(comparator.get("ts").toString());
-                if (compDate.isAfter(endDate)){
-                    break;
-                }
-                totalTimePlayed = totalTimePlayed.add(new BigDecimal((comparator.get("ms_played")).toString()));
-
-                if (trackID.equals(comparator.getString("spotify_track_uri"))){
-                    subTimePlayed = subTimePlayed.add(new BigDecimal((subject.get("ms_played")).toString()));
-                    subSongcount++;
-                }
-
+            if (trackID.equals(comparator.getString("spotify_track_uri"))){
+                subTimePlayed = subTimePlayed.add(new BigDecimal((subject.get("ms_played")).toString()));
+                subSongcount++;
             }
-
-            if (subTimePlayed.divide(totalTimePlayed, 6, RoundingMode.HALF_UP).compareTo(treshold) >= 0 && subSongcount > min){
-                validSongs.add(subject.get("spotify_track_uri").toString());
-            }
-
-            elementcount++;
-            //percentage
-            System.out.println(String.format("%.2f", elementcount / validElements * 100) + "%");
         }
-
-        System.out.println(validSongs);
-        System.out.println("Amount: " + validSongs.size());
-        writeArrayListToFile(new File("../../streaming data/valid songs/valid_songs.txt"), validSongs);
-        return validSongs;
+        if (subTimePlayed.divide(totalTimePlayed, 6, RoundingMode.HALF_UP).compareTo(treshold) >= 0 && subSongcount > min){
+            validSongs.add(subject.get("spotify_track_uri").toString());
+        }
     }
 
     public static void writeArrayListToFile(File file, ArrayList<String> StringList){
