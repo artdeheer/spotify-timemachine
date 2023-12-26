@@ -14,3 +14,10 @@ in the end more functionality could be added to the website
 for example add a discover playlist maker where you say what kindof of genre you want, this could be done with a few sample songs, and maybe you could say i want to discover this language in that genre
 
 argument exceptions
+different classes for jsonhandling, printing filereading and writing tui
+class DataProcessor {
+    public static Multimap<String, Double> getAllValidSongs() throws IOException {
+        // Implementation for getting valid songs...
+    }
+    // Other data processing methods...
+}
