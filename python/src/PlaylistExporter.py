@@ -1,10 +1,13 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
+from dotenv import load_dotenv
 
-os.environ['SPOTIPY_CLIENT_ID'] = '7d80e48c263e48dda9322a9974a26ec7'
-os.environ['SPOTIPY_CLIENT_SECRET'] = '8c109a217302409ca73716e855e49692'
-os.environ['SPOTIPY_REDIRECT_URI'] = 'https://localhost:8888/callback'
+load_dotenv()
+
+client_id = os.getenv("SPOTIPY_CLIENT_ID")
+client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
 
 filepath = "../../streaming data/valid songs/valid_songs.txt"
 validSongList = []
@@ -17,7 +20,6 @@ print(validSongList)
 
 # Your Spotify username and the playlist ID you want to add songs to
 username = "artfromkunst"
-# playlist_id = "4AQxUmzPmSuOWvFCfU4YyL"
 
 # Authenticate and authorize the Spotipy client
 scope = "playlist-modify-public playlist-modify-private"

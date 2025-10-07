@@ -27,3 +27,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+/python/src/cat/.cache-artfromkunst
+/python/src/cat/.env
