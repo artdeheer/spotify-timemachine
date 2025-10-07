@@ -2,8 +2,6 @@
 
 Spotify Timemachine analyzes a user's Spotify streaming history to identify tracks that defined specific time periods and rebuilds them into playlists automatically. The project combines Java for data analysis and Python for automation and playlist creation via the Spotify API.
 
----
-
 ## Overview
 
 1. **Data Analysis (Java)**  
@@ -15,8 +13,6 @@ Spotify Timemachine analyzes a user's Spotify streaming history to identify trac
    The Python scripts handle communication between components and with Spotify’s Web API.  
    - `PlaylistExporter.py` reads `valid_songs.txt` and creates a new Spotify playlist.  
    - `TerminalCommandRunner.py` and `Main.py` compile and run the Java analyzer automatically.
-
----
 
 ## File Structure
 
@@ -33,8 +29,6 @@ Spotify Timemachine analyzes a user's Spotify streaming history to identify trac
     ├── rawdata/                   # Place your Spotify JSON files here
     └── valid songs/               # Output folder for valid_songs.txt
 ```
-
----
 
 ## Setup and Usage
 
@@ -60,14 +54,10 @@ Spotify Timemachine analyzes a user's Spotify streaming history to identify trac
    python PlaylistExporter.py
    ```
 
----
-
 ## Output
 
 - `valid_songs.txt` — a text file containing Spotify track URIs that meet the playback frequency threshold.  
 - Automatically generated Spotify playlist named *“timemachine”* under your account.
-
----
 
 ## Notes
 
